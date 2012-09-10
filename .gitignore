@@ -8,6 +8,7 @@ obj
 daemon/zabbix.lua
 script/zabbix.lua
 config/init.lua
+config/init2.lua
 daemon/zabbix_adeven.lua
 daemon/zabbix_muewulff.lua
 script/check

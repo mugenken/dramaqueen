@@ -59,3 +59,9 @@ logDest  = "/var/log/dramaqueen/drama.log"
 -- right now no authentification is implemented -> every user, who can contact dramaqueen can execute the scripts!
 -- output goes always to the user who invoked the command
 foreignHosts = { "localhost:9897", "localhost:9898", "playground.vm.over9000.org:9898" }
+
+-- sharedSecret: a basic authorization. the shared secret must be the same on all nodes
+sharedSecret = "exampleSecret"
+
+-- authorizedUsers: a list of users, who are allowed to execute scripts in scriptDir via XMPP interface
+authorizedUsers = { "roa@localhost" }

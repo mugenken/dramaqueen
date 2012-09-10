@@ -2,7 +2,7 @@
 
 -- checkTime: specifies the interval in seconds in which
 -- the script is called. only integer values are acceptable
-checkTime = 1
+checkTime = 3
 
 -- script: specifies the script name which the daemon should call.
 -- do NOT give the full path, only the name. the working directory is specified

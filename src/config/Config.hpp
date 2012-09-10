@@ -35,7 +35,9 @@ public:
     std::string getDaemonDir();
     std::string getScriptDir();
     std::string getLogDest();
+    std::string getSharedSecret();
     std::vector<std::string> * getForeignHosts();
+    std::vector<std::string> * getAuthorizedUsers();
 
 private:
     Config();
@@ -59,7 +61,9 @@ private:
     std::string daemonDir;
     std::string scriptDir;
     std::string logDest;
+    std::string sharedSecret;
     std::vector<std::string>* foreignHosts;
+    std::vector<std::string>* authorizedUsers;
 
 };
 

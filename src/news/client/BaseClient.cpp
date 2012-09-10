@@ -4,7 +4,7 @@ namespace Dramaqueen
 {
 
 BaseClient::BaseClient( std::string _host, std::string _command ) :
-    host( _host ), command( _command ), shouldRun( true )
+    host( _host ), command( Config::getSingletonPtr()->getSharedSecret().append( _command ) ), shouldRun( true )
 {
     initBaseClient();
 }
@@ -90,6 +90,8 @@ void BaseClient::destroyBio()
 {
     SSL_CTX_free( ctx );
     BIO_free_all( bio );
+    ctx = NULL;
+    bio = NULL;
 }
 
 std::string BaseClient::connectToServer()
