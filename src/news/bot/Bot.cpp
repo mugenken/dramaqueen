@@ -14,6 +14,7 @@ Bot::Bot()
 Bot::~Bot()
 {
     delete j;
+    j = NULL;
     Helper::log( "Bot: an error occured: shutting down bot" );
 }
 
@@ -45,8 +46,7 @@ void Bot::initXMPP()
     j = new Client( jid, Config::getSingletonPtr()->getXmppPasswd() );
     j->registerConnectionListener( this );
     j->registerMessageHandler( this );
-    j->logInstance().registerLogHandler( LogLevelDebug, LogAreaAll, this );
-
+    //j->setServer( "talk.google.com" );
     Helper::log( "initialized bot..." );
 }
 
@@ -67,18 +67,22 @@ bool Bot::onTLSConnect( const CertInfo& info )
 
 void Bot::handleMessage( const Message& stanza, MessageSession* session )
 {
-    if( !stanza.body().empty() )
+    if( stanza.body().empty() )
     {
-        Message::MessageType type = Message::MessageType::Chat;
+        return;
+    }
+    Message::MessageType type = Message::MessageType::Chat;
+
+    if( checkRecipient( stanza.from().bare() ) )
+    {
         Message msg( type, stanza.from(), contactHosts( stanza.body() ) );
         j->send( msg );
-
     }
-}
-
-void Bot::handleLog( LogLevel level, LogArea area, const std::string& message )
-{
-    //printf("log: level: %d, area: %d, %s\n", level, area, message.c_str() );
+    else
+    {
+        Message msg( type, stanza.from(), "You are not in the recipients list. Contact your admin." );
+        j->send( msg );
+    }
 }
 
 std::string Bot::contactHosts( std::string command )
@@ -100,6 +104,20 @@ std::string Bot::contactHosts( std::string command )
         results.append( "no hits" );
     }
     return results;
+}
+
+bool Bot::checkRecipient( std::string from )
+{
+    std::vector<std::string> * authorizedUsers = Config::getSingletonPtr()->getAuthorizedUsers();
+    for( std::vector<std::string>::iterator it = authorizedUsers->begin(); it != authorizedUsers->end(); ++it )
+    {
+        std::string authorizedUser = *it;
+        if( from.find( authorizedUser ) == 0 && from.size() == authorizedUser.size() )
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 }

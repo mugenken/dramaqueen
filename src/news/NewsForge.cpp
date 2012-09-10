@@ -22,6 +22,8 @@ void NewsForge::operator() ()
 void NewsForge::initDaemonForge( std::string daemonDir, Client* _j, ConnectionError* ce )
 {
     DIR* dp = opendir( daemonDir.c_str() );
+    std::vector<std::string> daemonList;
+
     while( true )
     {
         struct dirent* dir = readdir( dp );
@@ -37,13 +39,24 @@ void NewsForge::initDaemonForge( std::string daemonDir, Client* _j, ConnectionEr
         }
         if( currentFile.find( ".lua" ) < currentFile.npos )
         {
-            std::thread daemonThread{ DaemonForge( currentFile, _j, ce ) };
-            daemonThread.detach();
+            daemonList.push_back( currentFile );
         }
         else
         {
             Helper::log( "DaemonForge: by convention daemon names must have \".lua\"-suffix - not starting:", currentFile );
         }
+    }
+
+    std::vector<std::thread> threads( daemonList.size() );
+    int count = 0;
+    for( std::vector<std::thread>::iterator it = threads.begin(); it != threads.end(); ++it )
+    {
+        *it = std::thread{ DaemonForge( daemonList.at( count ), _j, ce ) };
+        ++count;
+    }
+    for( auto&& i : threads )
+    {
+        i.join();
     }
     closedir( dp );
 }
