@@ -29,17 +29,25 @@ Config::Config()
 
 Config::Config( std::string config )
 {
-    foreignHosts = new std::vector<std::string>;
+    foreignHosts    = new std::vector<std::string>;
+    authorizedUsers = new std::vector<std::string>;
     load( config.c_str() );
 }
 
 Config::~Config()
 {
     delete foreignHosts;
+    delete authorizedUsers;
+    foreignHosts = NULL;
+    authorizedUsers = NULL;
 }
 
 void Config::load( const char* fname )
 {
+    /**
+        TODO
+        Log failures on loading!
+    **/
     L = luaL_newstate();
     if( luaL_loadfile( L, fname ) || lua_pcall( L, 0, 0, 0 ) )
     {
@@ -188,9 +196,22 @@ void Config::load( const char* fname )
     }
     lua_pop( L, 1 );
 
-     /**********************
-     *  load foreign Hosts *
+    /**********************
+     *  load sharedSecret *
      **********************/
+    lua_getglobal( L, "sharedSecret" );
+    if( !lua_isstring( L, 1 ) )
+    {
+    }
+    else
+    {
+        sharedSecret = lua_tostring( L, 1 );
+    }
+    lua_pop( L, 1 );
+
+    /***********************
+     *  load foreign Hosts *
+     ***********************/
     lua_getglobal( L, "foreignHosts" );
     if( !lua_istable( L, 1 ) )
     {
@@ -208,6 +229,30 @@ void Config::load( const char* fname )
         for( std::vector<std::string>::iterator it = foreignHosts->begin(); it != foreignHosts->end(); ++it )
         {
             std::string foreignHost = *it;
+        }
+    }
+    lua_pop( L, 1 );
+
+    /***********************
+     *load authorizedUsers *
+     ***********************/
+    lua_getglobal( L, "authorizedUsers" );
+    if( !lua_istable( L, 1 ) )
+    {
+    }
+    else
+    {
+        lua_pushnil( L );
+
+        while( lua_next( L, 1 ) != 0 )
+        {
+            authorizedUsers->push_back( lua_tostring( L, -1 ) );
+            lua_pop( L, 1 );
+        }
+
+        for( std::vector<std::string>::iterator it = authorizedUsers->begin(); it != authorizedUsers->end(); ++it )
+        {
+            std::string authorizedUser = *it;
         }
     }
 
@@ -269,9 +314,19 @@ std::string Config::getLogDest()
     return logDest;
 }
 
+std::string Config::getSharedSecret()
+{
+    return sharedSecret;
+}
+
 std::vector<std::string> * Config::getForeignHosts()
 {
     return foreignHosts;
+}
+
+std::vector<std::string> * Config::getAuthorizedUsers()
+{
+    return authorizedUsers;
 }
 
 }

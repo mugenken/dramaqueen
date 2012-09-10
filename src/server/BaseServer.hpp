@@ -29,6 +29,11 @@ namespace Dramaqueen
 class BaseServer
 {
 
+public:
+    BaseServer();
+    ~BaseServer();
+    void run();
+
 private:
     SSL_CTX* ctx;
     std::string cert;
@@ -42,11 +47,8 @@ private:
     void initServer();
     void handleClient();
     std::string executeScript( std::string script );
-
-public:
-    BaseServer();
-    ~BaseServer();
-    void run();
+    //checks message for sharedsecred
+    std::string parseMessage( std::string message );
 
 };
 
